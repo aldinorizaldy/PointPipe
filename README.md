@@ -28,10 +28,10 @@ cd PointPipe
 ### 2. Place trained PointNet weights in the `weights/` directory: `weights/pointnet.pth` 
 
 ### 3. Build and Run with Docker 
-# Build the container image
+Build the container image
 `docker build -t pointpipe-api .`
 
-# Start the service
+Start the service
 `docker run -p 8000:8000 pointpipe-api`
 
 ### 4. Interactive API Testing
