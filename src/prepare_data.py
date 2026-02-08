@@ -2,7 +2,7 @@ import numpy as np
 import os
 from tqdm import tqdm
 
-def tile_dataset(input_path, output_dir, tile_size=10.0, stride=5.0):
+def tile_dataset(input_path, output_dir, tile_size=30.0, stride=5.0):
     """Splits giant UTM files into smaller overlapping tiles."""
     os.makedirs(output_dir, exist_ok=True)
     

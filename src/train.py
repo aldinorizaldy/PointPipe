@@ -20,7 +20,7 @@ class TiledVaihingenDataset(torch.utils.data.Dataset):
         # Load tiled data (X, Y, Z, Intensity, ..., Label)
         data = np.load(self.files[idx])
         xyz = data[:, :3]
-        labels = data[:, -1].astype(int) - 1  # 0-indexed for CrossEntropy
+        labels = data[:, -1].astype(int) 
         
         # Normalize and Resample
         xyz, labels = self.processor.fix_num_points(xyz, labels)
@@ -33,7 +33,7 @@ class TiledVaihingenDataset(torch.utils.data.Dataset):
 def train():
     # Hyperparameters
     EPOCHS = 50
-    BATCH_SIZE = 32
+    BATCH_SIZE = 4
     LEARNING_RATE = 0.001
     DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     
@@ -56,10 +56,13 @@ def train():
             points, labels = points.to(DEVICE), labels.to(DEVICE)
             
             optimizer.zero_grad()
-            pred, _ = model(points) # PointNet usually returns (pred, trans_matrix)
-            
-            # Reshape for CrossEntropy: (B, C, N)
-            loss = criterion(pred, labels)
+
+            pred = model(points) # PointNet usually returns (pred, trans_matrix)
+
+            pred_flat = pred.contiguous().view(-1, 9)
+            labels_flat = labels.view(-1)
+
+            loss = criterion(pred_flat, labels_flat)
             loss.backward()
             optimizer.step()
             
