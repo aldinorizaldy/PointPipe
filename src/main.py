@@ -29,7 +29,10 @@ async def predict(file: UploadFile = File(...)):
     
     # 2. Preprocess (Center, Scale, Sample to 4096)
     xyz = data[:, :3]
-    input_points = processor.process_for_inference(xyz) 
+    if xyz.shape[0] == 4096:
+        input_points = processor.normalize(xyz)
+    else:
+        input_points = processor.process_for_inference(xyz)
     
     # 3. Convert to Tensor (B, C, N)
     input_tensor = torch.from_numpy(input_points.T).float().unsqueeze(0).to(DEVICE)
@@ -45,5 +48,5 @@ async def predict(file: UploadFile = File(...)):
     return {
         "filename": file.filename,
         "points_processed": len(labels),
-        "predictions": class_names[:10] # Return first 10 for preview
+        "predictions": class_names
     }

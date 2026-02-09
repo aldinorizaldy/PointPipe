@@ -1,27 +1,29 @@
-# Step 1: Use an official lightweight PyTorch image
-FROM pytorch/pytorch:2.1.0-cuda11.8-cudnn8-runtime
+# Step 1: Use a slim Python base (much faster on Mac Intel)
+FROM python:3.9-slim
 
 # Step 2: Set the working directory inside the container
 WORKDIR /app
 
-# Step 3: Install system dependencies (needed for some 3D math libs)
-RUN apt-get update && apt-get install -y --no-install-recommends \
-    build-essential \
+# Step 3: Updated for compatibility with Debian Trixie/Bookworm
+RUN apt-get update && apt-get install -y \
+    libgl1 \
+    libglib2.0-0 \
     && rm -rf /var/lib/apt/lists/*
 
-# Step 4: Copy the requirements file and install dependencies
+# Step 4: Copy only the requirements first to leverage Docker cache
 COPY requirements.txt .
+
+# Step 5: Install dependencies
+# We specify the CPU-only version of Torch to keep the image small
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Step 5: Copy project code and weights into the container
-# Copy the 'src', 'models', and 'weights' folders
-COPY ./src ./src
-COPY ./models ./models
-COPY ./weights ./weights
+# Step 6: Copy your project files into the container
+COPY src/ ./src/
+COPY models/ ./models/
+COPY weights/ ./weights/
 
-# Step 6: Expose the port FastAPI runs on
+# Step 7: Expose the port FastAPI will run on
 EXPOSE 8000
 
-# Step 7: The command to run the API
-# Use uvicorn to serve the FastAPI app
+# Step 8: Start the API using Uvicorn
 CMD ["uvicorn", "src.main:app", "--host", "0.0.0.0", "--port", "8000"]
