@@ -51,14 +51,22 @@ def process_full_file(input_path, output_path, chunk_size=1024):
         # Update progress on one line
         print(f"✅ Progress: {len(all_predictions)} / {total_points} (Chunk starting at {i})", end='\r')
 
+    # Create a reverse map to turn names back into IDs
+    name_to_id = {
+        "Powerline": 1, "Low Veg": 2, "Impervious": 3, 
+        "Car": 4, "Fence": 5, "Roof": 6, 
+        "Facade": 7, "Shrub": 8, "Tree": 9, "Unknown": 0
+}
+    
     # 3. Final Save
     print(f"\n💾 Saving {len(all_predictions)} results to {output_path}...")
     with open(output_path, 'w') as f:
-        f.write("# X Y Z Label\n")
-        # Use the length of all_predictions to match back to XYZ
         for j in range(len(all_predictions)):
-            f.write(f"{xyz[j,0]:.3f} {xyz[j,1]:.3f} {xyz[j,2]:.3f} {all_predictions[j]}\n")
-
+            label_name = all_predictions[j]
+            label_id = name_to_id.get(label_name, 0)
+            # Format: X Y Z ID
+            f.write(f"{xyz[j,0]:.3f} {xyz[j,1]:.3f} {xyz[j,2]:.3f} {label_id}\n")
+            
     print("✨ Finished!")
 
 if __name__ == "__main__":
